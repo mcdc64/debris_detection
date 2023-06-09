@@ -19,7 +19,7 @@ def debris_abs_cart_pos (rot_mat_sat, debris_horiz_angle, debris_vert_angle, d_d
     x_debris_sat = d_horiz_debris_cam_bottom*np.cos(debris_horiz_angle)
     y_debris_sat = d_horiz_debris_cam_bottom*np.sin(debris_horiz_angle)
     debris_sat_pos = np.array([x_debris_sat,y_debris_sat,z_debris_sat])
-    debris_abs_pos = np.matmul(np.invert(rot_mat_sat),debris_sat_pos)
+    debris_abs_pos = debris_sat_pos
     return(debris_abs_pos)
 
 def position_calculation(cam_bottom_com, cam_top_com, rot_matrix, cam_param):

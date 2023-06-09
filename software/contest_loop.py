@@ -7,15 +7,30 @@ import cv2
 import frame_difference
 import spin
 import numpy as np
+import camtest
 from debris_class import Debris
 from absolut_position import position_calculation
 
+    
+
+
+avail,working,nonworking = camtest.list_ports()
+print(working)
 # Initiate debris records
 debris_list = []
 
 # at beginning of loop, define cameras and images to be differenced
-cam_bottom = cv2.VideoCapture(0)
-cam_top = cv2.VideoCapture(1)
+cam_bottom = cv2.VideoCapture(working[0])
+cam_top = cv2.VideoCapture(working[1])
+
+
+stationary = True
+
+cam_top.set(cv2.CAP_PROP_AUTO_EXPOSURE, 3)
+if stationary:
+    cam_top.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)
+    cam_top.set(cv2.CAP_PROP_EXPOSURE, 5)
+
 
 ret, cam_bottom_img = cam_bottom.read()
 ret, cam_top_img = cam_top.read()
@@ -25,11 +40,12 @@ ret, cam_top_img = cam_top.read()
 horiz_angle_of_view = 62 #[deg] angle of view in the horizontal (longer side) direction
 vert_angle_of_view = 48#[deg] angle of view in the vertical (shorter side) direction
 img_shape = np.shape(cam_bottom_img)
-d_cameras = 0.14 #[m] distance between the cameras
+d_cameras = 0.28 #[m] distance between the cameras
 cam_param = np.array([horiz_angle_of_view*np.pi/180,vert_angle_of_view*np.pi/180,img_shape[0],img_shape[1],d_cameras])
 
 debris_buffer = []
 frame_time = time.time()
+
 while True:
     # Getting the time measurement at the begining of the frame
     last_frame_time = frame_time # time at start of last frame
@@ -44,13 +60,13 @@ while True:
     ret,cam_top_img = cam_top.read()
 
 
-    cam_bottom_diff = frame_difference.get_diff_image(cam_bottom_img,old_cam_bottom_img)
-    cam_top_diff = frame_difference.get_diff_image(cam_top_img,old_cam_top_img)
+    cam_bottom_diff = frame_difference.get_diff_image(cam_bottom_img,old_cam_bottom_img,stationary)
+    cam_top_diff = frame_difference.get_diff_image(cam_top_img,old_cam_top_img,stationary,stat_threshold = 20)
     cam_bottom_com = frame_difference.center_of_mass(cam_bottom_diff)
     cam_top_com = frame_difference.center_of_mass(cam_top_diff)
     
-    cv2.imshow('Imagetest',cam_bottom_diff)
-    cv2.imshow('Imagetest2',cam_top_diff)
+    cv2.imshow('Bottomcam',cam_bottom_diff)
+    cv2.imshow('Topcam',cam_top_diff)
     k = cv2.waitKey(1)
     if(cam_bottom_com[0] ==-1 or cam_top_com[0] == -1): # this means there is no debris in the frame
         

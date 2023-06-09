@@ -30,14 +30,17 @@ def display_com(image): #displays the center of mass of an image (be sure the im
                                         cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     return image_with_com
 
-def get_diff_image(img1,img2):
+def get_diff_image(img1,img2,stationary,threshold=20,stat_threshold = 100):
     # returns difference of images 1 and 2, with some Gaussian blur added in
     # img1, img2 must have same dimensions and be OpenCV "Image" type
+    
 
     # blur the inputs by an amount proportional to the geometric mean of their x and y dimensions
     gauss_sigma = int(0.015*np.sqrt(np.shape(img1)[0]*np.shape(img1)[1]))
     if (gauss_sigma % 2 == 0):
         gauss_sigma += 1
+        
+        
 
     img1_blur = cv2.GaussianBlur(img1,(gauss_sigma,gauss_sigma),0)
     img2_blur = cv2.GaussianBlur(img2, (gauss_sigma, gauss_sigma), 0)
@@ -45,8 +48,11 @@ def get_diff_image(img1,img2):
     grey_img1 = cv2.cvtColor(img1_blur,cv2.COLOR_BGR2GRAY)
     grey_img2 = cv2.cvtColor(img2_blur, cv2.COLOR_BGR2GRAY)
 
+
     diff_img = cv2.absdiff(grey_img1,grey_img2)
     ret, diff_img = cv2.threshold(diff_img,20,255,cv2.THRESH_BINARY)
+    if stationary:
+        ret, diff_img = cv2.threshold(grey_img1,stat_threshold,255,cv2.THRESH_BINARY)
     return diff_img
 
 def get_com(img1,img2):
